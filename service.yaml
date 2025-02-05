@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fms-service
+spec:
+  selector:
+    app: fms
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8081
+      nodePort: 32499  # Expose via NodePort
+  type: NodePort

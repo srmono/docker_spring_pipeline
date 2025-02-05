@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql-container
+          image: mysql:8
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: fms-secret
+                  key: DB_PASSWORD
+            - name: MYSQL_DATABASE
+              value: fleet
+          ports:
+            - containerPort: 3306
+          readinessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-ppassword"]
+            initialDelaySeconds: 30
+            periodSeconds: 10

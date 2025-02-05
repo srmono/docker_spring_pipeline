@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fms-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fms
+  template:
+    metadata:
+      labels:
+        app: fms
+    spec:
+      containers:
+        - name: fms-container
+          image: fms-app  # Make sure this image exists locally
+          imagePullPolicy: Never
+          command: [ "sh", "-c", "sleep 30 && java -jar /app.jar" ]  # Wait for MySQL to start
+          ports:
+            - containerPort: 8081
+          env:
+            - name: DB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: fms-config
+                  key: DB_URL
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: fms-secret
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: fms-secret
+                  key: DB_PASSWORD
+          livenessProbe:
+            tcpSocket:
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 10
